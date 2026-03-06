@@ -1,0 +1,30 @@
+{
+  "name": "Flexi Abandoned Cart Recovery for WooCommerce",
+  "slug": "flexi-abandon-cart-recovery",
+  "version": "1.0.0",
+  "author": {
+    "name": "Start and Grow",
+    "url": "https://example.com"
+  },
+  "description": "Recover lost sales with automated abandoned cart emails and dynamic coupons.",
+  "homepage": "https://example.com/flexi-abandoned-cart",
+  "license": "GPL-2.0-or-later",
+  "keywords": [
+    "abandoned carts",
+    "woocommerce",
+    "email recovery",
+    "sales recovery",
+    "cart recovery",
+    "ecommerce"
+  ],
+  "requires": {
+    "wordpress": "5.9",
+    "php": "7.4",
+    "woocommerce": "6.0"
+  },
+  "tested": {
+    "wordpress": "6.4",
+    "php": "8.2",
+    "woocommerce": "8.0"
+  }
+}

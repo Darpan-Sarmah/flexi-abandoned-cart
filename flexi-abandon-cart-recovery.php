@@ -13,17 +13,21 @@
  * @package           Flexi_Abandon_Cart_Recovery
  *
  * @wordpress-plugin
- * Plugin Name:       Flexi Abandon Cart Recovery
- * Plugin URI:        https://flexi-abandon-cart-recovery
- * Description:       Recover your lost revenue. Capture email address of users on the checkout page and send follow up emails if they don't complete the purchase.
+ * Plugin Name:       Flexi Abandoned Cart Recovery for WooCommerce
+ * Plugin URI:        https://example.com/flexi-abandoned-cart
+ * Description:       Recover lost sales with automated abandoned cart emails and dynamic coupons
  * Version:           1.0.0
  * Author:            Start and Grow
- * Author URI:        https://test/
- * License:           GPL-2.0+
- * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Author URI:        https://example.com
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       flexi-abandon-cart-recovery
  * Domain Path:       /languages
- * Requires Plugins: woocommerce
+ * Requires at least: 5.9
+ * Requires PHP:      7.4
+ * WC requires at least: 6.0
+ * WC tested up to:   8.0
+ * Requires Plugins:  woocommerce
  */
 
 // If this file is called directly, abort.

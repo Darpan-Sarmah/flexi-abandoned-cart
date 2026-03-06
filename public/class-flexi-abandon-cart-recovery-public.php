@@ -100,13 +100,23 @@ class Flexi_Abandon_Cart_Recovery_Public {
 
 	}
 	/**
+	 * Check if the force guest login setting is enabled.
+	 *
+	 * @return bool True if force guest login is enabled.
+	 */
+	private function is_force_guest_login_enabled() {
+		$setting = json_decode( get_option( 'flexi_abandon_cart_plugin_global_setting' ), true );
+		return isset( $setting['force_guest_login'] ) && 'on' === $setting['force_guest_login'];
+	}
+
+	/**
 	 * Modify the price HTML to prompt the user to log in if they are not logged in.
 	 *
 	 * @param string $price The HTML price markup.
 	 * @return string Modified price HTML or login link if the user is not logged in.
 	 */
 	public function flexi_cart_woocommerce_get_price_html( $price ) {
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return '<a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">Login</a> to see prices';
 		}
 
@@ -120,7 +130,7 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	 * @return bool Modified purchasable status based on user login.
 	 */
 	public function flexi_cart_woocommerce_is_purchasable( $is_purchasable ) {
-		if ( ! is_user_logged_in() ) {
+		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return false;
 		}
 

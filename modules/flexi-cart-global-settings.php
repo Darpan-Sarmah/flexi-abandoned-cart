@@ -33,6 +33,12 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
         $aban_cart_rec_setting_array[ 'enable_tracking' ] = 'off';
     }
 
+    if (isset($aban_cart_rec_setting_array[ 'force_guest_login' ])) {
+        $aban_cart_rec_setting_array[ 'force_guest_login' ] = 'on';
+    } else {
+        $aban_cart_rec_setting_array[ 'force_guest_login' ] = 'off';
+    }
+
     // Language Switch.
     if (isset($aban_cart_rec_setting_array[ 'email_and_plugin_language' ])) {
 
@@ -78,6 +84,24 @@ $checked         = 'on' === $enable_tracking ? 'checked' : '';
                             <input name="enable_tracking" id="enable_tracking" type="checkbox" value="on"
                                 <?php echo esc_html($checked); ?>>
                             <?php echo esc_html__('Enable to start tracking abandoned cart', 'flexi-abandon-cart-recovery'); ?>
+                        </label>
+                    </td>
+                </tr>
+
+                <!-- Force Guest Users to Login -->
+                <tr>
+                    <th scope="row" class="titledesc">
+                        <?php echo esc_html__('Force Guest Users to Login', 'flexi-abandon-cart-recovery'); ?>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <label for="force_guest_login">
+                            <?php
+$force_guest_login = isset($saved_settings[ 'force_guest_login' ]) ? $saved_settings[ 'force_guest_login' ] : 'off';
+$checked           = 'on' === $force_guest_login ? 'checked' : '';
+?>
+                            <input name="force_guest_login" id="force_guest_login" type="checkbox" value="on"
+                                <?php echo esc_html($checked); ?>>
+                            <?php echo esc_html__('Require guest users to log in before viewing prices or purchasing. Disable to allow guest cart tracking.', 'flexi-abandon-cart-recovery'); ?>
                         </label>
                     </td>
                 </tr>

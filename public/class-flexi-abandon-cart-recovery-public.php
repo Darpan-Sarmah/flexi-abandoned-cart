@@ -100,6 +100,7 @@ class Flexi_Abandon_Cart_Recovery_Public {
 
 	}
 	/**
+	 * Determine whether the plugin is configured to force guest users to log in.
 	 * Check if the force guest login setting is enabled.
 	 *
 	 * @return bool True if force guest login is enabled.
@@ -112,10 +113,45 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	/**
 	 * Modify the price HTML to prompt the user to log in if they are not logged in.
 	 *
+	 * Developers can override this via the `flexi_allow_guest_checkout` filter.
+	 * Return `true` from the filter to allow guest checkout regardless of the setting.
+	 *
+	 * @since    1.0.0
+	 * @return bool True if guest login should be enforced, false otherwise.
+	 */
+	private function should_force_guest_login() {
+		$setting = get_option( 'flexi_force_guest_login', 'off' );
+		$force   = 'on' === $setting;
+
+		/**
+		 * Filter whether to allow guest checkout.
+		 *
+		 * Return true to allow guests to browse and purchase without logging in,
+		 * overriding the admin setting.
+		 *
+		 * @since 1.0.0
+		 * @param bool $allow_guest True to allow guest checkout, false to enforce login.
+		 */
+		$allow_guest = apply_filters( 'flexi_allow_guest_checkout', ! $force );
+
+		return ! $allow_guest;
+	}
+
+	/**
+	 * Modify the price HTML to prompt the user to log in if they are not logged in
+	 * and the "Force Guest Users to Login" setting is enabled.
+	 *
+	 * Usage: This method is hooked to `woocommerce_get_price_html`. It only hides
+	 * prices when the `flexi_force_guest_login` option is set to 'on'. Developers
+	 * can override this behaviour using the `flexi_allow_guest_checkout` filter.
+	 *
+	 * @since    1.0.0
 	 * @param string $price The HTML price markup.
-	 * @return string Modified price HTML or login link if the user is not logged in.
+	 * @return string Modified price HTML or login link if the user is not logged in
+	 *                and guest login is enforced.
 	 */
 	public function flexi_cart_woocommerce_get_price_html( $price ) {
+		if ( ! is_user_logged_in() && $this->should_force_guest_login() ) {
 		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return '<a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">Login</a> to see prices';
 		}
@@ -126,10 +162,17 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	/**
 	 * Determine if the product is purchasable based on user login status.
 	 *
+	 * Usage: This method is hooked to `woocommerce_is_purchasable`. It only blocks
+	 * purchases when the `flexi_force_guest_login` option is set to 'on'. Developers
+	 * can override this behaviour using the `flexi_allow_guest_checkout` filter.
+	 *
+	 * @since    1.0.0
 	 * @param bool $is_purchasable Whether the product is purchasable.
-	 * @return bool Modified purchasable status based on user login.
+	 * @return bool Modified purchasable status based on user login and the guest
+	 *              login setting.
 	 */
 	public function flexi_cart_woocommerce_is_purchasable( $is_purchasable ) {
+		if ( ! is_user_logged_in() && $this->should_force_guest_login() ) {
 		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return false;
 		}

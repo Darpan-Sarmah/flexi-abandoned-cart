@@ -50,6 +50,10 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
         update_option('WPLANG', $email_and_plugin_language);
     }
 
+    // Save the force guest login setting as a standalone option for easy retrieval.
+    $force_guest_login = isset($aban_cart_rec_setting_array['flexi_force_guest_login']) ? 'on' : 'off';
+    update_option('flexi_force_guest_login', $force_guest_login);
+
     // Update Setting Option.
     $array_to_save = wp_json_encode($aban_cart_rec_setting_array, true);
     update_option('flexi_abandon_cart_plugin_global_setting', $array_to_save);
@@ -256,6 +260,32 @@ $email_from = isset($saved_settings[ 'email_from' ]) ? esc_attr($saved_settings[
                                 <?php echo esc_html__('Italian', 'flexi-abandon-cart-recovery'); ?>
                             </option>
                         </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h2><?php echo esc_html__('Guest User Behavior', 'flexi-abandon-cart-recovery'); ?></h2>
+
+        <table class="form-table configuration_settings">
+            <tbody>
+                <!-- Force Guest Login -->
+                <tr>
+                    <th scope="row" class="titledesc">
+                        <?php echo esc_html__('Force Guest Users to Login?', 'flexi-abandon-cart-recovery'); ?>
+                    </th>
+                    <td class="forminp forminp-checkbox">
+                        <label for="flexi_force_guest_login">
+                            <?php
+$flexi_force_guest_login = get_option('flexi_force_guest_login', 'off');
+$checked                 = 'on' === $flexi_force_guest_login ? 'checked' : '';
+?>
+                            <input name="flexi_force_guest_login" id="flexi_force_guest_login" type="checkbox" value="on"
+                                <?php echo esc_html($checked); ?>>
+                            <?php echo esc_html__('Enable this to require guest users to login before viewing prices or making purchases. Disable to allow guest browsing and track guest cart abandonment.', 'flexi-abandon-cart-recovery'); ?>
+                        </label>
                     </td>
                 </tr>
             </tbody>

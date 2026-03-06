@@ -21,6 +21,14 @@ if (isset($_GET[ 'panel' ]) && 'email-template-creation' === $_GET[ 'panel' ]) {
         $email_body    = isset($_POST[ 'email_temp_body' ]) ? wp_kses_post(wp_unslash($_POST[ 'email_temp_body' ])) : '';
         $coupon_status = isset($_POST[ 'coupon_status' ]) ? sanitize_text_field(wp_unslash($_POST[ 'coupon_status' ])) : '';
 
+        // A/B testing and scheduling extra data.
+        $extra_data_new = array(
+            'ab_test_enabled' => !empty($_POST['ab_test_enabled']) ? 1 : 0,
+            'ab_subject_b'    => isset($_POST['ab_subject_b']) ? sanitize_text_field(wp_unslash($_POST['ab_subject_b'])) : '',
+            'send_days'       => isset($_POST['send_days']) ? array_map('absint', (array) $_POST['send_days']) : array(),
+            'send_hour'       => isset($_POST['send_hour']) ? intval($_POST['send_hour']) : -1,
+        );
+
         if ('on' === $coupon_status) {
             $coupon_type = isset($_POST[ 'coupon_type' ]) ? sanitize_text_field(wp_unslash($_POST[ 'coupon_type' ])) : '';
 
@@ -44,6 +52,7 @@ if (isset($_GET[ 'panel' ]) && 'email-template-creation' === $_GET[ 'panel' ]) {
             'coupon_status' => $coupon_status,
             'coupon_type'   => $coupon_type,
             'coupon_name'   => $coupon_name,
+            'extra_data'    => wp_json_encode($extra_data_new),
         );
 
         // Check if new template is to be activated.
@@ -90,6 +99,14 @@ if (isset($_GET[ 'panel' ]) && 'email-template-creation' === $_GET[ 'panel' ]) {
         $email_body    = isset($_POST[ 'email_temp_body' ]) ? wp_kses_post(wp_unslash($_POST[ 'email_temp_body' ])) : '';
         $coupon_status = isset($_POST[ 'coupon_status' ]) ? sanitize_text_field(wp_unslash($_POST[ 'coupon_status' ])) : '';
 
+        // A/B testing and scheduling extra data.
+        $extra_data_new = array(
+            'ab_test_enabled' => !empty($_POST['ab_test_enabled']) ? 1 : 0,
+            'ab_subject_b'    => isset($_POST['ab_subject_b']) ? sanitize_text_field(wp_unslash($_POST['ab_subject_b'])) : '',
+            'send_days'       => isset($_POST['send_days']) ? array_map('absint', (array) $_POST['send_days']) : array(),
+            'send_hour'       => isset($_POST['send_hour']) ? intval($_POST['send_hour']) : -1,
+        );
+
         if ('on' === $coupon_status) {
             $coupon_type = isset($_POST[ 'coupon_type' ]) ? sanitize_text_field(wp_unslash($_POST[ 'coupon_type' ])) : '';
 
@@ -108,6 +125,7 @@ if (isset($_GET[ 'panel' ]) && 'email-template-creation' === $_GET[ 'panel' ]) {
             'coupon_status' => $coupon_status,
             'coupon_type'   => $coupon_type,
             'coupon_name'   => $coupon_name,
+            'extra_data'    => wp_json_encode($extra_data_new),
         );
         $where = ('id =' . $template_id);
         if ('on' === $temp_status) {
@@ -275,8 +293,85 @@ $temp_id     = isset($template_id) ? $template_id : '';
                             <?php echo esc_html__('Cart Link', 'flexi-abandon-cart-recovery'); ?></option>
                         <option value="{{coupon_discount}}">
                             <?php echo esc_html__('Coupon Discount', 'flexi-abandon-cart-recovery'); ?></option>
+                        <option value="{{unsubscribe_url}}">
+                            <?php echo esc_html__('Unsubscribe Link (GDPR)', 'flexi-abandon-cart-recovery'); ?></option>
 
                     </select>
+                </td>
+            </tr>
+            <!-- A/B Testing for Subject Line -->
+            <tr>
+                <th scope="row">
+                    <label for="ab_test_enabled"><?php echo esc_html__('A/B Test Subject Line', 'flexi-abandon-cart-recovery'); ?></label>
+                </th>
+                <td>
+                    <?php
+$extra_data_raw = isset($form_data['extra_data']) ? $form_data['extra_data'] : '';
+$extra_data     = !empty($extra_data_raw) ? json_decode($extra_data_raw, true) : array();
+if ( ! is_array($extra_data) ) {
+    $extra_data = array();
+}
+$ab_enabled    = !empty($extra_data['ab_test_enabled']) ? 'checked' : '';
+$ab_subject_b  = isset($extra_data['ab_subject_b']) ? esc_attr($extra_data['ab_subject_b']) : '';
+?>
+                    <label>
+                        <input type="checkbox" name="ab_test_enabled" id="ab_test_enabled" value="1" <?php echo esc_attr($ab_enabled); ?>>
+                        <?php echo esc_html__('Enable A/B Testing', 'flexi-abandon-cart-recovery'); ?>
+                    </label>
+                </td>
+            </tr>
+            <tr id="ab_test_row" style="<?php echo $ab_enabled ? '' : 'display:none;'; ?>">
+                <th scope="row">
+                    <label for="ab_subject_b"><?php echo esc_html__('Subject Line B (Variant)', 'flexi-abandon-cart-recovery'); ?></label>
+                </th>
+                <td>
+                    <input name="ab_subject_b" type="text" id="ab_subject_b" class="regular-text"
+                        value="<?php echo $ab_subject_b; ?>"
+                        placeholder="<?php echo esc_attr__('Alternative subject line for 50% of recipients', 'flexi-abandon-cart-recovery'); ?>">
+                    <p class="description"><?php echo esc_html__('50% of recipients will receive subject A, 50% will receive subject B. The better-performing variant is tracked in email logs.', 'flexi-abandon-cart-recovery'); ?></p>
+                </td>
+            </tr>
+            <!-- Send Schedule -->
+            <tr>
+                <th scope="row">
+                    <label for="send_days"><?php echo esc_html__('Send On Days', 'flexi-abandon-cart-recovery'); ?></label>
+                </th>
+                <td>
+                    <?php
+$send_days = isset($extra_data['send_days']) ? (array) $extra_data['send_days'] : array();
+$days      = array(
+    '1' => __('Monday', 'flexi-abandon-cart-recovery'),
+    '2' => __('Tuesday', 'flexi-abandon-cart-recovery'),
+    '3' => __('Wednesday', 'flexi-abandon-cart-recovery'),
+    '4' => __('Thursday', 'flexi-abandon-cart-recovery'),
+    '5' => __('Friday', 'flexi-abandon-cart-recovery'),
+    '6' => __('Saturday', 'flexi-abandon-cart-recovery'),
+    '7' => __('Sunday', 'flexi-abandon-cart-recovery'),
+);
+foreach ($days as $day_num => $day_name) {
+    $checked_day = in_array($day_num, $send_days, true) ? 'checked' : '';
+    echo '<label style="margin-right:10px;"><input type="checkbox" name="send_days[]" value="' . esc_attr($day_num) . '" ' . esc_attr($checked_day) . '> ' . esc_html($day_name) . '</label>';
+}
+?>
+                    <p class="description"><?php echo esc_html__('Leave all unchecked to send any day.', 'flexi-abandon-cart-recovery'); ?></p>
+                </td>
+            </tr>
+            <!-- Time Zone Aware Scheduling -->
+            <tr>
+                <th scope="row">
+                    <label for="send_hour"><?php echo esc_html__('Preferred Send Hour', 'flexi-abandon-cart-recovery'); ?></label>
+                </th>
+                <td>
+                    <?php $send_hour = isset($extra_data['send_hour']) ? intval($extra_data['send_hour']) : -1; ?>
+                    <select name="send_hour" id="send_hour">
+                        <option value="-1" <?php selected($send_hour, -1); ?>><?php echo esc_html__('Any hour', 'flexi-abandon-cart-recovery'); ?></option>
+                        <?php for ($h = 0; $h <= 23; $h++) { ?>
+                        <option value="<?php echo esc_attr($h); ?>" <?php selected($send_hour, $h); ?>>
+                            <?php echo esc_html(sprintf('%02d:00', $h)); ?>
+                        </option>
+                        <?php } ?>
+                    </select>
+                    <p class="description"><?php echo esc_html__('Schedule emails to send at a specific hour (site timezone). Use -1 for no restriction.', 'flexi-abandon-cart-recovery'); ?></p>
                 </td>
             </tr>
             <tr id="coupon_status_container">
@@ -291,7 +386,6 @@ $checked       = ('on' === $coupon_status) ? 'checked' : '';
                             <?php echo esc_attr($checked); ?>>
                     </label>
                 </td>
-            </tr>
             <tr id="coupon_details" style="display:none;">
                 <th scope="row">
                     <label
@@ -380,3 +474,15 @@ wp_editor($initial_data, $editor_id, $settings);
         </button>
     </form>
 </div>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // A/B test row toggle.
+    $('#ab_test_enabled').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#ab_test_row').show();
+        } else {
+            $('#ab_test_row').hide();
+        }
+    });
+});
+</script>

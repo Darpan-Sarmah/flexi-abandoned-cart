@@ -1,30 +1,35 @@
 {
-  "name": "Flexi Abandoned Cart Recovery for WooCommerce",
+  "name": "flexi-abandon-cart-recovery",
   "slug": "flexi-abandon-cart-recovery",
   "version": "1.0.0",
-  "author": {
-    "name": "Start and Grow",
-    "url": "https://example.com"
+  "author": "Start and Grow",
+  "author_profile": "https://profiles.wordpress.org/startandgrow",
+  "requires": "5.6",
+  "tested": "6.7",
+  "requires_php": "7.4",
+  "requires_plugins": ["woocommerce"],
+  "rating": 0,
+  "num_ratings": 0,
+  "support_url": "https://wordpress.org/support/plugin/flexi-abandon-cart-recovery/",
+  "last_updated": "2024-01-01",
+  "added": "2024-01-01",
+  "homepage": "https://github.com/Darpan-Sarmah/flexi-abandoned-cart",
+  "download_link": "",
+  "sections": {
+    "description": "Recover lost WooCommerce revenue by capturing abandoning shoppers' emails and sending automated follow-up campaigns with optional dynamic discount coupons.",
+    "installation": "See INSTALLATION.md for full instructions.",
+    "changelog": "See CHANGELOG.md for full changelog.",
+    "faq": "See README.md for frequently asked questions."
   },
-  "description": "Recover lost sales with automated abandoned cart emails and dynamic coupons.",
-  "homepage": "https://example.com/flexi-abandoned-cart",
-  "license": "GPL-2.0-or-later",
-  "keywords": [
-    "abandoned carts",
-    "woocommerce",
-    "email recovery",
-    "sales recovery",
-    "cart recovery",
-    "ecommerce"
-  ],
-  "requires": {
-    "wordpress": "5.9",
-    "php": "7.4",
-    "woocommerce": "6.0"
+  "tags": {
+    "abandoned-cart": "abandoned cart",
+    "cart-recovery": "cart recovery",
+    "woocommerce": "woocommerce",
+    "email-marketing": "email marketing",
+    "cart-abandonment": "cart abandonment"
   },
-  "tested": {
-    "wordpress": "6.4",
-    "php": "8.2",
-    "woocommerce": "8.0"
-  }
+  "license": "GPL-2.0+",
+  "license_uri": "http://www.gnu.org/licenses/gpl-2.0.html",
+  "text_domain": "flexi-abandon-cart-recovery",
+  "domain_path": "/languages"
 }

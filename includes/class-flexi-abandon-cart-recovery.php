@@ -122,6 +122,23 @@ class Flexi_Abandon_Cart_Recovery {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-flexi-abandon-cart-recovery-public.php';
 
+		/**
+		 * REST API endpoints for external integrations.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-flexi-rest-api.php';
+
+		/**
+		 * Webhook dispatcher for real-time event notifications.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-flexi-webhooks.php';
+
+		/**
+		 * Third-party integration base and individual integrations.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-base.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-mailchimp.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-google-analytics.php';
+
 		$this->loader = new Flexi_Abandon_Cart_Recovery_Loader();
 
 	}
@@ -189,7 +206,7 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_action( 'woocommerce_thankyou', $plugin_admin, 'track_purchase', 1 );
 
 		$this->loader->add_filter( 'cron_schedules', $plugin_admin, 'flexi_add_custom_scheduler' );
-		$this->loader->add_filter( 'init', $plugin_admin, 'flexi_coupon_cart_expiry_scheduler' );
+		$this->loader->add_action( 'init', $plugin_admin, 'flexi_coupon_cart_expiry_scheduler' );
 		$this->loader->add_filter( 'flexi_check_cart_expiry', $plugin_admin, 'mark_flexi_cart_expiry');
 		$this->loader->add_filter( 'flexi_check_coupon_expiry', $plugin_admin, 'mark_flexi_coupons_expiry');
 		
@@ -203,6 +220,21 @@ class Flexi_Abandon_Cart_Recovery {
 
 			$this->loader->add_filter( 'mce_buttons', $plugin_admin, 'flexi_tinymce_admin_btn' );
 			$this->loader->add_filter( 'mce_external_plugins', $plugin_admin, 'flexi_admin_filter_mce_plugin' );
+		}
+
+		// Initialize REST API.
+		new Flexi_Rest_Api();
+
+		// Initialize Webhooks.
+		new Flexi_Webhooks();
+
+		// Initialize active integrations.
+		$integrations = array(
+			new Flexi_ACR_Integration_Mailchimp(),
+			new Flexi_ACR_Integration_Google_Analytics(),
+		);
+		foreach ( $integrations as $integration ) {
+			$integration->init();
 		}
 
 	}
@@ -221,8 +253,10 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
-		$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		if ( 'on' === get_option( 'flexi_force_guest_login', 'off' ) ) {
+			$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
+			$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		}
 	}
 
 	/**

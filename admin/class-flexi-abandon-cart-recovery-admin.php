@@ -50,10 +50,6 @@ class Flexi_Abandon_Cart_Recovery_Admin {
      * @param      string    $version    The version of this plugin.
      */
     public function __construct( $plugin_name, $version ) {
-         ini_set( 'display_errors', 1 );
-        ini_set( 'display_startup_errors', 1 );
-        error_reporting( E_ALL );
-
         $this->plugin_name = $plugin_name;
         $this->version     = $version;
         include_once FLEXI_ABANDON_CART_RECOVERY_DIR . 'admin/partials/class-flexi-database-queries.php';
@@ -722,8 +718,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         if ( !( isset( $abandoned_cart_setting['enable_tracking'] ) && 'on' === $abandoned_cart_setting['enable_tracking'] ) ) {
             return false;
         }
-        // $abandon_check_cart_track = $abandoned_cart_setting['cart_abandon_time'];
-        // $resnd_mail_after         = $abandoned_cart_setting['resend_email_after'];
+        $abandon_check_cart_track = $this->calculate_abandon_check_duration( $abandoned_cart_setting, 'abandon_time_check' );
         $abandoned_carts_queries = new Flexi_Database_Queries();
         $parms                   = array( 'id', 'cart_status', 'created_at', 'abandon_time', 'last_interaction_at' );
         $results                 = $abandoned_carts_queries->select_db_query( 'flexi_users_cart_details', $parms, 'cart_status = "active"', 'user_id =' . $user_id . '' );
@@ -733,20 +728,20 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         foreach ( $results as $result ) {
             $time_log        = $result['created_at'];
             $time_difference = time() - strtotime( $time_log );
-            // if ($time_difference >= $abandon_check_cart_track) {
+            if ( $time_difference >= $abandon_check_cart_track ) {
 
-            $new_status = empty( $result['cart_status'] ) ? 'removed' : 'abandoned';
-            $parms      = array(
-                'cart_status'  => $new_status,
-                'abandon_time' => $current_time,
-            );
-            $where      = 'id = ' . $result['id'] . '';
+                $new_status = empty( $result['cart_status'] ) ? 'removed' : 'abandoned';
+                $parms      = array(
+                    'cart_status'  => $new_status,
+                    'abandon_time' => $current_time,
+                );
+                $where      = 'id = ' . absint( $result['id'] );
 
-            $abandoned_carts_queries->update_db_query( 'flexi_users_cart_details', $parms, $where );
-            if ( 'abandoned' === $new_status ) {
-                $first_mail = $this->enable_send_mail_for_abandon_carts( $user_id );
+                $abandoned_carts_queries->update_db_query( 'flexi_users_cart_details', $parms, $where );
+                if ( 'abandoned' === $new_status ) {
+                    $first_mail = $this->enable_send_mail_for_abandon_carts( $user_id );
+                }
             }
-            // }
         }
     }
 
@@ -790,7 +785,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
                 }
             }
             // } elseif (($current_time - $mail_sent_at) >= $resend_interval) {
-        } else {
+        } elseif ( ( $current_time - $mail_sent_at ) >= $resend_interval ) {
 
             // echo "---second--";
 
@@ -1350,7 +1345,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         }
     }
 
-    public function flexi_add_custom_scheduler() {
+    public function flexi_add_custom_scheduler( $schedules ) {
          $schedules['every_five_minutes'] = array(
 			 'interval' => 300,
 			 'display'  => __( 'Every 5 Minutes' ),

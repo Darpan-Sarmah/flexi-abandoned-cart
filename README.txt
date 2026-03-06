@@ -1,114 +1,152 @@
-=== Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: https://test/
-Tags: comments, spam
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+=== Flexi Abandon Cart Recovery ===
+Contributors: startandgrow
+Tags: abandoned cart, cart recovery, woocommerce, email marketing, cart abandonment
+Requires at least: 5.6
+Tested up to: 6.7
+Stable tag: 1.0.0
+Requires PHP: 7.4
+Requires Plugins: woocommerce
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+Recover lost revenue by capturing abandoning shoppers' emails and sending automated follow-up emails with optional discount coupons.
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+**Flexi Abandon Cart Recovery** helps WooCommerce store owners recover revenue from customers who add items to their cart but leave without completing the purchase.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+The plugin captures email addresses at the checkout page, detects cart abandonment, and automatically sends personalised follow-up emails — optionally including dynamic discount coupons — to bring customers back.
 
-A few notes about the sections above:
+= Key Features =
 
-*   "Contributors" is a comma separated list of wp.org/wp-plugins.org usernames
-*   "Tags" is a comma separated list of tags that apply to the plugin
-*   "Requires at least" is the lowest version that the plugin will work on
-*   "Tested up to" is the highest version that you've *successfully used to test the plugin*. Note that it might work on
-higher versions... this is just the highest one you've verified.
-*   Stable tag should indicate the Subversion "tag" of the latest stable version, or "trunk," if you use `/trunk/` for
-stable.
+* **Automatic Cart Tracking** – Detects when a WooCommerce cart is abandoned based on a configurable inactivity timeout.
+* **Email Recovery Campaigns** – Send one or more timed follow-up emails to recovering shoppers.
+* **Dynamic Coupon Generation** – Automatically create unique discount coupons and embed them in recovery emails.
+* **Email Templates** – Built-in rich-text editor (TinyMCE) with dynamic shortcode placeholders such as `{{cart_details}}`, `{{cart_checkout_url}}`, `{{coupon_code}}`, and more.
+* **Rule Engine** – Define audience rules based on product, category, cart value, or user role to control which abandoned carts trigger emails.
+* **Email Triggers** – Configure multiple triggers with different templates, rules, and send-time delays.
+* **Detailed Logs & Analytics** – Track emails sent, opened, clicked, and conversions (purchases) per campaign.
+* **Global Settings** – Configure cart abandonment timeout, email sender details, GDPR consent message, and more.
+* **Scheduler** – Built-in WordPress cron integration that periodically checks for abandoned carts and sends recovery emails automatically.
+* **Multisite Compatible** – Works in WordPress Multisite environments.
+* **Internationalization Ready** – Fully translatable with `.pot` file support.
 
-    Note that the `readme.txt` of the stable tag is the one that is considered the defining one for the plugin, so
-if the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used
-for displaying information about the plugin.  In this situation, the only thing considered from the trunk `readme.txt`
-is the stable tag pointer.  Thus, if you develop in trunk, you can update the trunk `readme.txt` to reflect changes in
-your in-development version, without having that information incorrectly disclosed about the current stable version
-that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
+= How It Works =
 
-    If no stable tag is provided, it is assumed that trunk is stable, but you should specify "trunk" if that's where
-you put the stable version, in order to eliminate any doubt.
+1. A visitor adds items to their WooCommerce cart and begins the checkout process.
+2. The plugin captures their email address.
+3. If the checkout is not completed within the configured abandonment timeout, the cart is marked as abandoned.
+4. The scheduler runs at regular intervals and triggers recovery emails according to the configured rules and triggers.
+5. Each email can include a personalised dynamic coupon to incentivise the purchase.
+6. When the customer clicks the recovery link and completes their order, the cart is automatically marked as recovered.
+
+= Available Email Shortcodes =
+
+* `{{cart_details}}` – Renders an HTML table of the abandoned cart items.
+* `{{cart_checkout_url}}` – Inserts a direct link back to the cart/checkout page.
+* `{{coupon_code}}` – Inserts the generated coupon code.
+* `{{coupon_discount}}` – Displays the coupon discount amount or percentage.
+* `{{email_name}}` – Inserts the store name configured in Global Settings.
+* `{{user_name}}` – Inserts the customer's display name.
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+= Minimum Requirements =
 
-e.g.
+* WordPress 5.6 or higher
+* WooCommerce 5.0 or higher
+* PHP 7.4 or higher
+* MySQL 5.6 / MariaDB 10.0 or higher
 
-1. Upload `flexi-abandon-cart-recovery.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+= Automatic Installation (Recommended) =
+
+1. Log in to your WordPress admin dashboard.
+2. Go to **Plugins → Add New**.
+3. Search for **Flexi Abandon Cart Recovery**.
+4. Click **Install Now**, then **Activate**.
+
+= Manual Installation =
+
+1. Download the plugin `.zip` file.
+2. Log in to your WordPress admin dashboard.
+3. Go to **Plugins → Add New → Upload Plugin**.
+4. Choose the downloaded `.zip` file and click **Install Now**.
+5. After installation, click **Activate Plugin**.
+
+Alternatively, extract the `.zip` file and upload the `flexi-abandon-cart-recovery` folder to `/wp-content/plugins/` via FTP, then activate through the Plugins menu.
+
+= After Activation =
+
+1. Navigate to **Flexi Cart Recovery** in the WordPress admin sidebar.
+2. Review and update **Global Settings** (abandonment timeout, sender email, GDPR message).
+3. Customise the default **Email Templates** or create new ones.
+4. Set up **Email Triggers** to define when and to whom recovery emails are sent.
+5. Optionally create **Dynamic Coupons** to include incentives in recovery emails.
+6. Monitor results in the **Dashboard** and **Email Logs** sections.
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Does this plugin require WooCommerce? =
 
-An answer to that question.
+Yes. Flexi Abandon Cart Recovery is built specifically for WooCommerce and requires it to be installed and active.
 
-= What about foo bar? =
+= How is a cart considered "abandoned"? =
 
-Answer to foo bar dilemma.
+A cart is marked as abandoned when no checkout activity is detected for the duration specified in **Global Settings → Cart Abandonment Time** (default: 10 minutes).
+
+= Can I send more than one recovery email? =
+
+Yes. Create multiple **Email Triggers**, each configured with a different email template and a different **Send After** delay (e.g., 1 hour, 24 hours, 3 days).
+
+= How do dynamic coupons work? =
+
+When a trigger fires, the plugin checks if the assigned email template has coupons enabled. If so, it creates a new WooCommerce coupon with the configured discount type, amount, and expiry date and embeds the code in the email.
+
+= Are emails sent immediately after abandonment? =
+
+No. The plugin uses WordPress cron (scheduled events) to check for abandoned carts and send emails. The actual send time depends on the **Send After** delay configured for each trigger and the frequency at which WordPress cron runs.
+
+= Is the plugin GDPR-friendly? =
+
+The plugin stores customer email addresses only for users who have already entered them during the checkout process. A configurable GDPR consent message can be displayed. You remain responsible for complying with applicable privacy regulations.
+
+= Does it work with caching plugins? =
+
+The cart tracking relies on JavaScript and AJAX calls initiated during checkout interaction. Most popular caching plugins (WP Rocket, W3 Total Cache, etc.) should be compatible because checkout pages are typically excluded from caching.
+
+= Does it work in WordPress Multisite? =
+
+The plugin is compatible with WordPress Multisite. Each sub-site maintains its own plugin data tables.
+
+= How do I test that emails are being sent? =
+
+Navigate to **Email Templates**, open a template, and use the **Send Test Email** button to send a preview of the template to any email address.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. Dashboard overview showing abandoned cart stats and revenue recovered.
+2. Global Settings page.
+3. Email Templates list.
+4. Email Template editor with TinyMCE and shortcode reference.
+5. Email Triggers configuration.
+6. Dynamic Coupons management.
+7. Email Logs with open, click, and conversion tracking.
+8. Abandoned cart user details.
 
 == Changelog ==
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
-
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+= 1.0.0 =
+* Initial release.
+* Abandoned cart tracking for WooCommerce.
+* Automated email recovery campaigns.
+* Dynamic coupon generation.
+* Rule-based email triggers.
+* Detailed email logs and analytics dashboard.
+* TinyMCE email template editor.
+* WordPress cron scheduler integration.
+* GDPR consent message configuration.
 
 == Upgrade Notice ==
 
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
-
-== Arbitrary section ==
-
-You may provide arbitrary sections, in the same format as the ones above.  This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation."  Arbitrary sections will be shown below the built-in sections outlined above.
-
-== A brief Markdown Example ==
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`
+= 1.0.0 =
+Initial release. No upgrade steps required.

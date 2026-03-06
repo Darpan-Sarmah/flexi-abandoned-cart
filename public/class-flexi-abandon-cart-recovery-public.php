@@ -101,6 +101,17 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	}
 	/**
 	 * Determine whether the plugin is configured to force guest users to log in.
+	 * Check if the force guest login setting is enabled.
+	 *
+	 * @return bool True if force guest login is enabled.
+	 */
+	private function is_force_guest_login_enabled() {
+		$setting = json_decode( get_option( 'flexi_abandon_cart_plugin_global_setting' ), true );
+		return isset( $setting['force_guest_login'] ) && 'on' === $setting['force_guest_login'];
+	}
+
+	/**
+	 * Modify the price HTML to prompt the user to log in if they are not logged in.
 	 *
 	 * Developers can override this via the `flexi_allow_guest_checkout` filter.
 	 * Return `true` from the filter to allow guest checkout regardless of the setting.
@@ -141,6 +152,7 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	 */
 	public function flexi_cart_woocommerce_get_price_html( $price ) {
 		if ( ! is_user_logged_in() && $this->should_force_guest_login() ) {
+		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return '<a href="' . get_permalink( wc_get_page_id( 'myaccount' ) ) . '">Login</a> to see prices';
 		}
 
@@ -161,6 +173,7 @@ class Flexi_Abandon_Cart_Recovery_Public {
 	 */
 	public function flexi_cart_woocommerce_is_purchasable( $is_purchasable ) {
 		if ( ! is_user_logged_in() && $this->should_force_guest_login() ) {
+		if ( ! is_user_logged_in() && $this->is_force_guest_login_enabled() ) {
 			return false;
 		}
 

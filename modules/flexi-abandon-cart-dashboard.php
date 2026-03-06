@@ -12,13 +12,12 @@
  * @subpackage Flexi_Abandon_Cart_Recovery/modules
  */
 
-// $abandoned_carts_queries = new Flexi_Database_Queries();
-// $user_cart_details       = $abandoned_carts_queries->select_db_query( 'acr_users_cart_details', '*' );
+$abandoned_carts_queries = new Flexi_Database_Queries();
+$user_cart_details       = $abandoned_carts_queries->select_db_query( 'flexi_users_cart_details', '*' );
 
-// $mail_track_detais = $abandoned_carts_queries->select_db_query( 'acr_emails_tracking', array( 'opened', 'clicked' ) );
+$mail_track_details = $abandoned_carts_queries->select_db_query( 'flexi_email_logs', array( 'opened', 'clicked' ) );
 
-// $total_carts = ! empty( $user_cart_details ) ? count( $user_cart_details ) : 0;
-$total_carts     = 0;
+$total_carts     = ! empty( $user_cart_details ) ? count( $user_cart_details ) : 0;
 $abandoned_carts = 0;
 $purchased_carts = 0;
 $active_carts    = 0;
@@ -29,37 +28,42 @@ $total_cost           = 0.0;
 $purchased_total_cost = 0.0;
 $recovered_ratio      = 0;
 
-// if ( ! empty( $user_cart_details ) ) {
-//     foreach ( $user_cart_details as $cart ) {
+if ( ! empty( $user_cart_details ) ) {
+    foreach ( $user_cart_details as $cart ) {
 
-//         switch ( $cart['cart_status'] ) {
-//             case 'abandoned':
-//                 ++$abandoned_carts;
-//                 break;
-//             case 'purchased':
-//                 ++$purchased_carts;
-//                 break;
-//             case 'active':
-//                 ++$active_carts;
-//                 break;
-//         }
+        switch ( $cart['cart_status'] ) {
+            case 'abandoned':
+                ++$abandoned_carts;
+                break;
+            case 'purchased':
+                ++$purchased_carts;
+                break;
+            case 'active':
+                ++$active_carts;
+                break;
+        }
 
-//         $cart_details    = json_decode( $cart['cart_details'], true );
-//         $cart_total_cost = $cart_details['total_cost'];
+        $cart_items      = $abandoned_carts_queries->select_db_query( 'flexi_users_cart_items', array( 'price', 'quantity' ), 'cart_id = ' . absint( $cart['id'] ) );
+        $cart_total_cost = 0.0;
+        if ( ! empty( $cart_items ) ) {
+            foreach ( $cart_items as $item ) {
+                $cart_total_cost += (float) $item['price'] * (int) $item['quantity'];
+            }
+        }
 
-//         $total_cost += $cart_total_cost;
+        $total_cost += $cart_total_cost;
 
-//         if ( 'purchased' === $cart['cart_status'] ) {
-//             $purchased_total_cost += $cart_total_cost;
-//         }
-//     }
-// }
-// if ( ! empty( $mail_track_detais ) ) {
-//     foreach ( $mail_track_detais as $key => $value ) {
-//         $link_clicked += isset( $value['clicked'] ) ? $value['clicked'] : 0;
-//         $mail_opened  += isset( $value['opened'] ) ? $value['opened'] : 0;
-//     }
-// }
+        if ( 'purchased' === $cart['cart_status'] ) {
+            $purchased_total_cost += $cart_total_cost;
+        }
+    }
+}
+if ( ! empty( $mail_track_details ) ) {
+    foreach ( $mail_track_details as $key => $value ) {
+        $link_clicked += isset( $value['clicked'] ) ? (int) $value['clicked'] : 0;
+        $mail_opened  += isset( $value['opened'] ) ? (int) $value['opened'] : 0;
+    }
+}
 ?>
 
 
@@ -173,12 +177,6 @@ $recovered_ratio      = 0;
 
 			</div>
 			<div class="ct-rec-ibox-content charts">
-				<h2> <?php esc_html_e('Revenue', 'flexi-abandon-cart-recovery');?> </h2>
-			</div>
-		</div>
-	</div>
-
-</div>-rec-ibox-content charts">
 				<h2> <?php esc_html_e('Revenue', 'flexi-abandon-cart-recovery');?> </h2>
 			</div>
 		</div>

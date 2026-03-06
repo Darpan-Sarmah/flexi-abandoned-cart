@@ -11,47 +11,58 @@
  * @subpackage Flexi_Abandon_Cart_Recovery/modules
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-exit;
+$abandoned_carts_queries = new Flexi_Database_Queries();
+$user_cart_details       = $abandoned_carts_queries->select_db_query( 'flexi_users_cart_details', '*' );
+
+$mail_track_details = $abandoned_carts_queries->select_db_query( 'flexi_email_logs', array( 'opened', 'clicked' ) );
+
+$total_carts     = ! empty( $user_cart_details ) ? count( $user_cart_details ) : 0;
+$abandoned_carts = 0;
+$purchased_carts = 0;
+$active_carts    = 0;
+$mail_opened     = 0;
+$link_clicked    = 0;
+
+$total_cost           = 0.0;
+$purchased_total_cost = 0.0;
+$recovered_ratio      = 0;
+
+if ( ! empty( $user_cart_details ) ) {
+    foreach ( $user_cart_details as $cart ) {
+
+        switch ( $cart['cart_status'] ) {
+            case 'abandoned':
+                ++$abandoned_carts;
+                break;
+            case 'purchased':
+                ++$purchased_carts;
+                break;
+            case 'active':
+                ++$active_carts;
+                break;
+        }
+
+        $cart_items      = $abandoned_carts_queries->select_db_query( 'flexi_users_cart_items', array( 'price', 'quantity' ), 'cart_id = ' . absint( $cart['id'] ) );
+        $cart_total_cost = 0.0;
+        if ( ! empty( $cart_items ) ) {
+            foreach ( $cart_items as $item ) {
+                $cart_total_cost += (float) $item['price'] * (int) $item['quantity'];
+            }
+        }
+
+        $total_cost += $cart_total_cost;
+
+        if ( 'purchased' === $cart['cart_status'] ) {
+            $purchased_total_cost += $cart_total_cost;
+        }
+    }
 }
-
-// Load analytics class.
-require_once FLEXI_ABANDON_CART_RECOVERY_DIR . 'modules/sub-modules/class-flexi-cart-analytics.php';
-
-// Date range filter.
-$date_from = isset( $_GET['date_from'] ) ? sanitize_text_field( wp_unslash( $_GET['date_from'] ) ) : '';
-$date_to   = isset( $_GET['date_to'] ) ? sanitize_text_field( wp_unslash( $_GET['date_to'] ) ) : '';
-$period    = isset( $_GET['period'] ) ? sanitize_text_field( wp_unslash( $_GET['period'] ) ) : 'daily';
-
-$valid_periods = array( 'daily', 'weekly', 'monthly' );
-if ( ! in_array( $period, $valid_periods, true ) ) {
-$period = 'daily';
+if ( ! empty( $mail_track_details ) ) {
+    foreach ( $mail_track_details as $key => $value ) {
+        $link_clicked += isset( $value['clicked'] ) ? (int) $value['clicked'] : 0;
+        $mail_opened  += isset( $value['opened'] ) ? (int) $value['opened'] : 0;
+    }
 }
-
-// Handle CSV export.
-if ( isset( $_GET['export'] ) && current_user_can( 'manage_options' ) ) {
-if ( ! isset( $_GET['flexi_export_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['flexi_export_nonce'] ) ), 'flexi_acr_export' ) ) {
-wp_die( esc_html__( 'Nonce verification failed.', 'flexi-abandon-cart-recovery' ) );
-}
-$analytics   = new Flexi_Cart_Analytics();
-$export_type = sanitize_text_field( wp_unslash( $_GET['export'] ) );
-$analytics->export_csv( $export_type, $date_from, $date_to );
-exit;
-}
-
-$analytics   = new Flexi_Cart_Analytics();
-$stats       = $analytics->get_summary_stats( $date_from, $date_to );
-$funnel      = $analytics->get_conversion_funnel( $date_from, $date_to );
-$top_products = $analytics->get_top_abandoned_products( 5, $date_from, $date_to );
-$tpl_perf    = $analytics->get_template_performance( $date_from, $date_to );
-
-// Chart data.
-$orders_chart  = $analytics->get_orders_chart_data( $period, $date_from, $date_to );
-$revenue_chart = $analytics->get_revenue_chart_data( $period, $date_from, $date_to );
-$email_chart   = $analytics->get_email_chart_data( $period, $date_from, $date_to );
-
-$currency = get_woocommerce_currency_symbol();
-$export_nonce = wp_create_nonce( 'flexi_acr_export' );
 ?>
 
 <div class="wrap woocommerce dashboard_page">
@@ -214,109 +225,120 @@ $export_nonce = wp_create_nonce( 'flexi_acr_export' );
 </div>
 </div>
 
-<!-- Revenue Chart -->
-<div class="ct-rec-grid-container-revenue">
-<div class="ct-rec-ibox chart-wrapper">
-<div class="ct-rec-ibox-content charts">
-<h2><?php esc_html_e( 'Revenue', 'flexi-abandon-cart-recovery' ); ?></h2>
-</div>
-<div class="ct-rec-ibox-title">
-<canvas id="revenueChart"></canvas>
-</div>
-</div>
-</div>
+<div class='wrap woocommerce dashboard_page'>
 
-<br>
+	<div class="ct-rec-grid-container">
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3> <?php esc_html_e('Total Orders', 'flexi-abandon-cart-recovery');?> </h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1> <?php echo esc_html($total_carts); ?> </h1>
+				<small> <?php esc_html_e('Total Carts.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
 
-<!-- Conversion Funnel -->
-<div class="ct-rec-grid-container-revenue">
-<div class="ct-rec-ibox" style="padding:20px;">
-<h2 style="margin-top:0;"><?php esc_html_e( 'Conversion Funnel', 'flexi-abandon-cart-recovery' ); ?></h2>
-<table class="widefat striped" style="width:100%;">
-<thead>
-<tr>
-<th><?php esc_html_e( 'Stage', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Count', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( '% of Total Carts', 'flexi-abandon-cart-recovery' ); ?></th>
-</tr>
-</thead>
-<tbody>
-<?php foreach ( $funnel as $stage ) : ?>
-<tr>
-<td><?php echo esc_html( $stage['stage'] ); ?></td>
-<td><?php echo esc_html( $stage['count'] ); ?></td>
-<td>
-<div style="display:flex; align-items:center; gap:8px;">
-<div style="background:#4CAF50; height:14px; width:<?php echo esc_attr( $stage['percentage'] ); ?>%; max-width:200px; border-radius:4px;"></div>
-<?php echo esc_html( $stage['percentage'] ); ?>%
-</div>
-</td>
-</tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-</div>
-</div>
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3> <?php esc_html_e('Abandoned Orders', 'flexi-abandon-cart-recovery');?> </h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1> <?php echo esc_html($abandoned_carts); ?> </h1>
+				<small> <?php esc_html_e('Total Abandoned Carts.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
 
-<br>
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3><?php esc_html_e('Recovered Orders', 'flexi-abandon-cart-recovery');?></h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1><?php echo esc_html($purchased_carts); ?></h1>
+				<small> <?php esc_html_e('Total Recovered Carts.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
+	</div>
 
-<!-- Two-column: Top Products + Template Performance -->
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+	<div class="ct-rec-grid-container">
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3> <?php esc_html_e('Recovered Revenue', 'flexi-abandon-cart-recovery');?> </h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1> <?php echo esc_html(get_woocommerce_currency_symbol() . $purchased_total_cost); ?> </h1>
+				<small> <?php esc_html_e('Total Recovered Revenue.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
 
-<!-- Top Abandoned Products -->
-<div class="ct-rec-ibox" style="padding:20px;">
-<h2 style="margin-top:0;"><?php esc_html_e( 'Top Abandoned Products', 'flexi-abandon-cart-recovery' ); ?></h2>
-<?php if ( ! empty( $top_products ) ) : ?>
-<table class="widefat striped">
-<thead>
-<tr>
-<th><?php esc_html_e( 'Product', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Times Abandoned', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Total Value', 'flexi-abandon-cart-recovery' ); ?></th>
-</tr>
-</thead>
-<tbody>
-<?php foreach ( $top_products as $product ) : ?>
-<tr>
-<td><?php echo esc_html( $product['item_name'] ); ?></td>
-<td><?php echo esc_html( $product['abandon_count'] ); ?></td>
-<td><?php echo esc_html( $currency . number_format( $product['total_value'], 2 ) ); ?></td>
-</tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-<?php else : ?>
-<p><?php esc_html_e( 'No abandoned product data available yet.', 'flexi-abandon-cart-recovery' ); ?></p>
-<?php endif; ?>
-</div>
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3><?php esc_html_e('Link Clicked', 'flexi-abandon-cart-recovery');?></h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1><?php echo esc_html($link_clicked); ?></h1>
+				<small> <?php esc_html_e('Total Count Of Link Opened.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
 
-<!-- Email Template Performance -->
-<div class="ct-rec-ibox" style="padding:20px;">
-<h2 style="margin-top:0;"><?php esc_html_e( 'Email Template Performance', 'flexi-abandon-cart-recovery' ); ?></h2>
-<?php if ( ! empty( $tpl_perf ) ) : ?>
-<table class="widefat striped">
-<thead>
-<tr>
-<th><?php esc_html_e( 'Template', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Sent', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Open %', 'flexi-abandon-cart-recovery' ); ?></th>
-<th><?php esc_html_e( 'Click %', 'flexi-abandon-cart-recovery' ); ?></th>
-</tr>
-</thead>
-<tbody>
-<?php foreach ( $tpl_perf as $tpl ) : ?>
-<tr>
-<td><?php echo esc_html( $tpl['template_name'] ); ?></td>
-<td><?php echo esc_html( $tpl['total_sent'] ); ?></td>
-<td><?php echo esc_html( $tpl['open_rate'] ); ?>%</td>
-<td><?php echo esc_html( $tpl['click_rate'] ); ?>%</td>
-</tr>
-<?php endforeach; ?>
-</tbody>
-</table>
-<?php else : ?>
-<p><?php esc_html_e( 'No template performance data available yet.', 'flexi-abandon-cart-recovery' ); ?></p>
-<?php endif; ?>
+		<div class="ct-rec-ibox">
+			<div class="ct-rec-ibox-title">
+				<h3><?php esc_html_e('Mail Opened Count', 'flexi-abandon-cart-recovery');?></h3>
+			</div>
+			<div class="ct-rec-ibox-content">
+				<h1><?php echo esc_html($mail_opened); ?></h1>
+				<small> <?php esc_html_e('Total Count Of Mail Opened.', 'flexi-abandon-cart-recovery');?> </small>
+			</div>
+		</div>
+
+	</div>
+
+
+	<br>
+	<br>
+	<div class="ct-rec-grid-container-charts">
+		<div class="ct-rec-ibox chart-wrapper">
+			<div class="ct-rec-ibox-title">
+				<canvas id="ordersChart"></canvas>
+
+			</div>
+			<div class="ct-rec-ibox-content charts">
+				<h2> <?php esc_html_e('Carts', 'flexi-abandon-cart-recovery');?> </h2>
+			</div>
+		</div>
+		<div class="ct-rec-ibox chart-wrapper">
+			<div class="ct-rec-ibox-title">
+				<canvas id="totalMailSentAndOpened"></canvas>
+
+			</div>
+			<div class="ct-rec-ibox-content charts">
+				<h2> <?php esc_html_e('Mail Send And Opened', 'flexi-abandon-cart-recovery');?> </h2>
+			</div>
+		</div>
+
+		<div class="ct-rec-ibox chart-wrapper">
+			<div class="ct-rec-ibox-title">
+				<canvas id="totalMailSentAndClicked"></canvas>
+
+			</div>
+			<div class="ct-rec-ibox-content charts">
+				<h2> <?php esc_html_e('Mail Send And Purchase Link Clicked', 'flexi-abandon-cart-recovery');?> </h2>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="ct-rec-grid-container-revenue">
+		<div class="ct-rec-ibox chart-wrapper">
+			<div class="ct-rec-ibox-title">
+				<canvas id="revenueChart"></canvas>
+
+			</div>
+			<div class="ct-rec-ibox-content charts">
+				<h2> <?php esc_html_e('Revenue', 'flexi-abandon-cart-recovery');?> </h2>
+			</div>
+		</div>
+	</div>
+
 </div>
 
 </div>

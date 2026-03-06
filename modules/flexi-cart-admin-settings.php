@@ -23,9 +23,6 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
     // Sanitize and save the settings.
     $admin_notifi_settings_array = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-    echo "<pre>";
-    print_r($admin_notifi_settings_array);
-
     $purchase_mail = isset($admin_notifi_settings_array[ 'purchase_mail' ]) ? $admin_notifi_settings_array[ 'purchase_mail' ] = 'on' : $admin_notifi_settings_array[ 'purchase_mail' ] = 'off';
 
     $receive_report = isset($admin_notifi_settings_array[ 'receive_report' ]) ? $admin_notifi_settings_array[ 'receive_report' ] = 'on' : $admin_notifi_settings_array[ 'receive_report' ] = 'off';

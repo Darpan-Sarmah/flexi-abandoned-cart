@@ -206,7 +206,7 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_action( 'woocommerce_thankyou', $plugin_admin, 'track_purchase', 1 );
 
 		$this->loader->add_filter( 'cron_schedules', $plugin_admin, 'flexi_add_custom_scheduler' );
-		$this->loader->add_filter( 'init', $plugin_admin, 'flexi_coupon_cart_expiry_scheduler' );
+		$this->loader->add_action( 'init', $plugin_admin, 'flexi_coupon_cart_expiry_scheduler' );
 		$this->loader->add_filter( 'flexi_check_cart_expiry', $plugin_admin, 'mark_flexi_cart_expiry');
 		$this->loader->add_filter( 'flexi_check_coupon_expiry', $plugin_admin, 'mark_flexi_coupons_expiry');
 		
@@ -253,8 +253,10 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
-		$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		if ( 'on' === get_option( 'flexi_force_guest_login', 'off' ) ) {
+			$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
+			$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		}
 	}
 
 	/**

@@ -50,10 +50,6 @@ class Flexi_Abandon_Cart_Recovery_Admin {
      * @param      string    $version    The version of this plugin.
      */
     public function __construct( $plugin_name, $version ) {
-         ini_set( 'display_errors', 1 );
-        ini_set( 'display_startup_errors', 1 );
-        error_reporting( E_ALL );
-
         $this->plugin_name = $plugin_name;
         $this->version     = $version;
         include_once FLEXI_ABANDON_CART_RECOVERY_DIR . 'admin/partials/class-flexi-database-queries.php';

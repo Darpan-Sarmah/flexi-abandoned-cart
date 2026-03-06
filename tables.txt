@@ -1,0 +1,145 @@
+
+        // Define table creation queries.
+        // CART DETAILS
+        // id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        //             user_id VARCHAR(20) NOT NULL,
+        //             cart_details TEXT NOT NULL,
+        //             user_information TEXT NOT NULL,
+        //             cart_status VARCHAR(20) NOT NULL,
+        //             time_log DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        //             abandon_time DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        //             is_expired TINYINT(1) NOT NULL DEFAULT 0,
+        //             is_hidden TINYINT(1) NOT NULL DEFAULT 0,
+        //             mail_sent_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        //             last_mail_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        //             is_purchased TINYINT(1) NOT NULL DEFAULT 0,
+        //             extra_data TEXT,
+
+        //             PRIMARY KEY (id),
+        //             UNIQUE KEY unique_user (cart_id),
+        // CART ITEMS
+        // id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // cart_id BIGINT(20) UNSIGNED NOT NULL,
+        // item_id BIGINT(20) UNSIGNED NOT NULL,
+        // quantity INT NOT NULL,
+        // price DECIMAL(10, 2) NOT NULL,
+        // PRIMARY KEY (id),
+        // FOREIGN KEY (cart_id) REFERENCES Cart_Details(id)
+
+        // USERS
+        // user_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // user_information JSON NOT NULL,
+        // PRIMARY KEY (user_id)
+
+        // Email Logs
+        // id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // user_id BIGINT(20) UNSIGNED NOT NULL,
+        // email_template_id BIGINT(20) UNSIGNED NOT NULL,
+        // coupon_id BIGINT(20) UNSIGNED,
+        // send_time DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        // status VARCHAR(10) NOT NULL, -- Could be ENUM ('sent', 'failed', 'opened', etc.)
+        // message TEXT DEFAULT NULL,
+        // error_count INT DEFAULT 0,
+        // success_count INT DEFAULT 0,
+        // opened INT(11) DEFAULT 0 NOT NULL,
+        // clicked INT(11) DEFAULT 0 NOT NULL,
+        // purchased INT(11) DEFAULT 0 NOT NULL,
+        // extra_data TEXT,
+        // PRIMARY KEY (id),
+        // FOREIGN KEY (email_template_id) REFERENCES Email_Templates(id),
+        // FOREIGN KEY (coupon_id) REFERENCES Coupons(id)
+
+        // Email Template
+        // id BIGINT(50) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // temp_language VARCHAR(50) NOT NULL,
+        // template_name VARCHAR(255) NOT NULL,
+        // email_subject VARCHAR(255) NOT NULL,
+        // email_body TEXT NOT NULL,
+        // coupon_id BIGINT(20) UNSIGNED,
+        // status VARCHAR(10) NOT NULL,
+        // created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        // extra_data TEXT,
+        // PRIMARY KEY (id),
+        // FOREIGN KEY (coupon_id) REFERENCES Coupons(id)
+
+        // Coupons
+        // id BIGINT(50) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // code VARCHAR(255) NOT NULL,
+        // discount_type ENUM('fixed', 'percentage') NOT NULL,
+        // dis_amt DECIMAL(10, 2) NOT NULL,
+        // is_individual_use TINYINT(1) NOT NULL DEFAULT 0,
+        // limit INT(11) DEFAULT 0 NOT NULL,
+        // filter JSON NOT NULL, -- Store as structured data
+        // expiry_date DATE NOT NULL,
+        // created_date DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        // is_expired TINYINT(1) NOT NULL DEFAULT 0,
+        // extra_data TEXT,
+        // PRIMARY KEY (id)
+
+        // Rules
+        // id BIGINT(50) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // rule_name VARCHAR(255) NOT NULL,
+        // rule_type VARCHAR(100) NOT NULL,
+        // rule_filter JSON NOT NULL,
+        // status VARCHAR(10) NOT NULL,
+        // extra_data TEXT,
+        // PRIMARY KEY (id)
+
+        // Triggers
+        // id BIGINT(50) UNSIGNED NOT NULL AUTO_INCREMENT,
+        // trigger_name VARCHAR(255) NOT NULL,
+        // email_template_id BIGINT(20) UNSIGNED,
+        // rule_id BIGINT(20) UNSIGNED, -- FK to Rules table
+        // status TINYINT(1) NOT NULL DEFAULT 0,
+        // extra_data TEXT,
+        // PRIMARY KEY (id),
+        // FOREIGN KEY (email_template_id) REFERENCES Email_Templates(id),
+        // FOREIGN KEY (rule_id) REFERENCES Rules(id)
+
+
+
+
+
+
+
+
+
+
+
+
+        <div id="error"><p class="wpdberror"><strong>WordPress database error: </strong> [Cannot add or update a child row: a foreign key constraint fails (`wordpress`.`wp_flexi_users_cart_items`, CONSTRAINT `wp_flexi_users_cart_items_ibfk_1` FOREIGN KEY (`cart_id`) REFERENCES `wp_flexi_users_cart_details` (`id`))]<br /><code>INSERT INTO wp_flexi_users_cart_items(cart_id,
+item_id,
+item_name,
+quantity,
+price)VALUES(&#039;0&#039;,
+&#039;55&#039;,
+&#039;Beanie with Logo&#039;,
+&#039;3&#039;,
+&#039;36&#039;);</code></p></div><div id="error"><p class="wpdberror"><strong>WordPress database error:</strong>[
+    Cannot add or update a child row: a foreign key constraint fails(`wordpress`.`wp_flexi_users_cart_items`,
+    CONSTRAINT `wp_flexi_users_cart_items_ibfk_1`FOREIGN KEY(`cart_id`)REFERENCES `wp_flexi_users_cart_details`(`id`))
+]<br/><code>INSERT INTO wp_flexi_users_cart_items(cart_id,
+item_id,
+item_name,
+quantity,
+price)VALUES(&#039;0&#039;,
+&#039;27&#039;,
+&#039;Beanie&#039;,
+&#039;1&#039;,
+&#039;54&#039;);</code></p></div><div id="error"><p class="wpdberror"><strong>WordPress database error:</strong>[
+    Table&#039;wordpress.wp_flexi_abandon_cart_users&#039;doesn&#039;t exist
+]<br/><code>INSERT INTO wp_flexi_abandon_cart_users(user_id,
+user_information)VALUES(&#039;1&#039;,
+&#039;[
+    {
+        user_id: 1,
+        \&quot;user_email\&quot;: \&quot;smritis2307@gmail.com\&quot;,
+        \&quot;user_displayname\&quot;: \&quot;admin\&quot;,
+        \&quot;user_nicename\&quot;: \&quot;admin\&quot;,
+        \&quot;user_firstname\&quot;: \&quot;\&quot;,
+        \&quot;user_lastname\&quot;: \&quot;\&quot;,
+        \&quot;user_role\&quot;: [
+            \&quot;administrator\&quot;
+        ]
+    }
+]&#039;);

@@ -1,0 +1,206 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+ 
+.dashboard_page{
+	margin-top: 2%;
+}
+.ct-rec-grid-container {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 20px;
+}
+
+.ct-rec-grid-container-revenue{
+	grid-template-columns: 1fr;
+}
+.ct-rec-grid-container-charts {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-gap: 20px;
+}
+
+.chart-wrapper {
+	position: relative;
+	width: 100%;
+	height: 600px;
+	overflow: hidden;
+}
+.ct-rec-ibox-content.charts{
+	text-align: center;
+}
+.ct-rec-ibox {
+	clear: both;
+	margin-bottom: 25px;
+	margin-top: 0;
+	padding: 0;
+}
+
+.ct-rec-ibox-title {
+	background-color: #fff;
+	border-image: none;
+	border-width: 3px 0 0;
+	color: inherit;
+	margin-bottom: 0;
+	padding: 14px 15px 7px;
+	/* min-height: 48px; */
+	height: 40%;
+}
+
+.ct-rec-ibox-content {
+	background-color: #fff;
+	color: inherit;
+	padding: 20px 20px 20px 20px;
+	border-color: #d7dadc;
+	border-image: none;
+	border-style: solid solid none;
+	border-width: 1px 0;
+}
+
+
+.cart_rcey-switch {
+	cursor: pointer;
+	display: block;
+	width: 38px;
+	height: 22px;
+	border-radius: 30px;
+	border: none;
+	position: relative;
+	box-sizing: border-box;
+	-webkit-transition: all 0.3s ease;
+	transition: all 0.3s ease;
+	box-shadow: inset 0 0 0 0 transparent;
+}
+.cart_rcey-switch:focus {
+	outline: none;
+}
+.cart_rcey-switch::before {
+	border-radius: 50%;
+	background: #fff;
+	content: "";
+	position: absolute;
+	display: block;
+	width: 18px;
+	height: 18px;
+	top: 2px;
+	left: 2px;
+	-webkit-transition: all 0.15s ease;
+	transition: all 0.15s ease;
+	box-shadow: 0 1px 3px rgba( 0, 0, 0, 0.3 );
+}
+.cart_rcey-switch[cart_rcey-template-switch="on"] {
+	box-shadow: inset 0 0 0 11px #008000;
+}
+.cart_rcey-switch[cart_rcey-template-switch="on"]::before {
+	-webkit-transform: translateX( 16px );
+	transform: translateX( 16px );
+}
+.cart_rcey-switch[cart_rcey-template-switch="off"] {
+	background: #ccc;
+}
+.cart_rcey-switch.wcap-loading {
+	cursor: default;
+	opacity: 0.5;
+}
+
+.cart_rcey-trigger-input {
+	height: 28px;
+	width: 40%;
+	margin-right: 10px;
+}
+#template_subject_shortcode{
+	min-width: 250px;
+}
+.modal-window {
+	position: fixed;
+	background-color: #8c8f94a8;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 999;
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
+	transition: all 0.3s;
+}
+.modal-window:target {
+	visibility: visible;
+	opacity: 1;
+	pointer-events:auto;
+}
+.modal-window > div {
+	width: 500px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	padding: 2em;
+	background: white;
+}
+.modal-window header {
+	font-weight: bold;
+}
+.modal-window h5 {
+	font-size: 150%;
+	margin: 0 0 15px;
+}
+.modal-close {
+	color: #000000;
+	line-height: 50px;
+	font-size: 20px;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+	width: 70px;
+	text-decoration: none;
+}
+.modal-close:hover {
+	color: black;
+}
+.modal-window > div {
+	border-radius: 1rem;
+}
+.modal-window div:not(:last-of-type) {
+	margin-bottom: 15px;
+}
+
+.filter-container, .rule-set-container {
+	margin-bottom: 20px;
+}
+
+.filter-row, .based-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+	margin-bottom: 10px;
+}
+
+.based-on, .include-exclude, .product-select, .category-select {
+    width: 150px;
+}
+
+.product-id-select-container, .product-category-select-container, .user-roles-select-container, .comparison-select-container{
+    display: none;
+}
+
+.product-id-select-container label, .product-category-select-container label, .user-roles-select-container label {
+    margin-right: 5px;
+    display: inline-block;
+}
+
+
+#selected-excel-columns table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#selected-excel-columns th {
+    background-color: #fff;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}

@@ -259,9 +259,9 @@ class Flexi_Webhooks {
 
 		$redirect = add_query_arg(
 			array(
-				'page'    => 'flexi-cart-recovery-settings',
-				'tab'     => 'webhooks',
-				'updated' => '1',
+				'page'          => 'flexi-cart-recovery-settings',
+				'section'       => 'webhooks',
+				'webhook-saved' => 'true',
 			),
 			admin_url( 'admin.php' )
 		);
@@ -274,6 +274,13 @@ class Flexi_Webhooks {
 	 * Generate an unsubscribe token for a given email address.
 	 *
 	 * Can be used in email templates via the {{unsubscribe_url}} shortcode.
+	 *
+	 * Note: Tokens are derived from wp_salt('auth'). If the site's WordPress
+	 * secret keys are rotated (e.g., via wp-cli or manual wp-config.php change),
+	 * previously issued unsubscribe links will become invalid. Users who click
+	 * a stale link will receive an error and can request a new email to get a
+	 * fresh link. Storing tokens in the database would eliminate this limitation
+	 * but adds DB overhead for a relatively rare operation.
 	 *
 	 * @since 1.0.0
 	 *

@@ -313,25 +313,40 @@ class Flexi_Rest_Api {
 		$page     = $request->get_param( 'page' );
 		$offset   = ( $page - 1 ) * $per_page;
 
-		$where = '';
 		if ( ! empty( $status ) ) {
-			$where = $wpdb->prepare( 'WHERE cart_status = %s', $status );
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, user_id, cart_status, created_at, abandon_time, is_expired, is_purchased
+					 FROM {$wpdb->prefix}flexi_users_cart_details
+					 WHERE cart_status = %s
+					 ORDER BY created_at DESC
+					 LIMIT %d OFFSET %d",
+					$status,
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			);
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(id) FROM {$wpdb->prefix}flexi_users_cart_details WHERE cart_status = %s",
+					$status
+				)
+			);
+		} else {
+			$items = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, user_id, cart_status, created_at, abandon_time, is_expired, is_purchased
+					 FROM {$wpdb->prefix}flexi_users_cart_details
+					 ORDER BY created_at DESC
+					 LIMIT %d OFFSET %d",
+					$per_page,
+					$offset
+				),
+				ARRAY_A
+			);
+			$total = (int) $wpdb->get_var( "SELECT COUNT(id) FROM {$wpdb->prefix}flexi_users_cart_details" );
 		}
-
-		$items = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT id, user_id, cart_status, created_at, abandon_time, is_expired, is_purchased
-				 FROM {$wpdb->prefix}flexi_users_cart_details
-				 {$where}
-				 ORDER BY created_at DESC
-				 LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			),
-			ARRAY_A
-		);
-
-		$total = (int) $wpdb->get_var( "SELECT COUNT(id) FROM {$wpdb->prefix}flexi_users_cart_details {$where}" );
 
 		return rest_ensure_response(
 			array(

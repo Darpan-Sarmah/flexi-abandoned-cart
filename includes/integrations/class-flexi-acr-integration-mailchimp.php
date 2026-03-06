@@ -123,6 +123,7 @@ class Flexi_ACR_Integration_Mailchimp extends Flexi_ACR_Integration_Base {
 			array(
 				'method'  => 'PUT',
 				'headers' => array(
+					// Mailchimp's API uses any string as the username; only the API key (password) matters.
 					'Authorization' => 'Basic ' . base64_encode( 'anystring:' . $api_key ),
 					'Content-Type'  => 'application/json',
 				),

@@ -624,6 +624,19 @@ class Flexi_Cart_Analytics {
 		global $wpdb;
 		$clause = '';
 
+		// Whitelist allowed column expressions to prevent SQL injection.
+		$allowed_columns = array(
+			'created_at',
+			'abandon_time',
+			'send_time',
+			'ucd.created_at',
+			'el.send_time',
+			'uci.created_at',
+		);
+		if ( ! in_array( $column, $allowed_columns, true ) ) {
+			return '';
+		}
+
 		if ( ! empty( $date_from ) ) {
 			$clause .= $wpdb->prepare( " AND {$column} >= %s", $date_from . ' 00:00:00' );
 		}

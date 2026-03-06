@@ -306,7 +306,11 @@ $temp_id     = isset($template_id) ? $template_id : '';
                 </th>
                 <td>
                     <?php
-$extra_data    = isset($form_data['extra_data']) ? json_decode($form_data['extra_data'], true) : array();
+$extra_data_raw = isset($form_data['extra_data']) ? $form_data['extra_data'] : '';
+$extra_data     = !empty($extra_data_raw) ? json_decode($extra_data_raw, true) : array();
+if ( ! is_array($extra_data) ) {
+    $extra_data = array();
+}
 $ab_enabled    = !empty($extra_data['ab_test_enabled']) ? 'checked' : '';
 $ab_subject_b  = isset($extra_data['ab_subject_b']) ? esc_attr($extra_data['ab_subject_b']) : '';
 ?>

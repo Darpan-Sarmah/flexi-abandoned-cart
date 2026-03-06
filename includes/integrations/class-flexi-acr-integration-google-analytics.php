@@ -139,9 +139,14 @@ class Flexi_ACR_Integration_Google_Analytics extends Flexi_ACR_Integration_Base 
 	/**
 	 * Get or generate a GA4 client ID.
 	 *
+	 * Reads the standard `_ga` cookie set by gtag.js to maintain client ID
+	 * continuity between browser-side and server-side events. Falls back to
+	 * a random UUID if the cookie is absent (e.g., on server-only requests).
+	 *
 	 * @return string
 	 */
 	private function get_client_id() {
+		// The _ga cookie is set by Google Analytics and is not sensitive; reading it is intentional.
 		$client_id = isset( $_COOKIE['_ga'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['_ga'] ) ) : '';
 		if ( $client_id ) {
 			// Extract the client ID portion from the _ga cookie (GA.x.xxxxxxxxxx.xxxxxxxxxx).

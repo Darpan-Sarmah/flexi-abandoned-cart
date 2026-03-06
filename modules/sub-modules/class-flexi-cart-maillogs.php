@@ -47,13 +47,13 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 	 *
 	 * @since 1.0.0
 	 */
-	public function prepareItems() {
+	public function prepare_items() {
 		$per_page = apply_filters( 'aband_cart_recov_email_logs_list_per_page', 10 );
 
-		$count    = $this->getCount();
+		$count    = $this->get_count();
 		$columns  = $this->get_columns();
 		$hidden   = array();
-		$sortable = $this->getSortableColumns();
+		$sortable = $this->get_sortable_columns();
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
@@ -72,7 +72,7 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 		);
 
 		if ( ! $this->current_action() ) {
-			$this->renderHTML();
+			$this->render_html();
 		} else {
 			$this->process_bulk_action();
 		}
@@ -84,7 +84,7 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 	 *
 	 * @return int The count of emails.
 	 */
-	public static function getCount() {
+	public static function get_count() {
 		$abandoned_carts_queries = new Flexi_Database_Queries();
 
 		$count = $abandoned_carts_queries->select_db_query( 'flexi_email_logs', 'COUNT(id)' );
@@ -142,7 +142,7 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 	 *
 	 * @return array
 	 */
-	public function getSortableColumns() {
+	public function get_sortable_columns() {
 		return array(
 			'subject'    => array( 'subject', false ),
 			'email_from' => array( 'email_from', false ),
@@ -266,7 +266,7 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 	 *
 	 * @since 1.0.0
 	 */
-	public function renderHTML() {
+	public function render_html() {
 		?>
   <div class="wrap cart_recovery_body">
             <!-- Notifications -->
@@ -432,4 +432,4 @@ class Flexi_Cart_Maillogs extends WP_List_Table {
 }
 
 $aband_cart_recov_user_list_obj = new Flexi_Cart_Maillogs();
-$aband_cart_recov_user_list_obj->prepareItems();
+$aband_cart_recov_user_list_obj->prepare_items();

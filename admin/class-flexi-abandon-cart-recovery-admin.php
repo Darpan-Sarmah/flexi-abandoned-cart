@@ -246,6 +246,12 @@ class Flexi_Abandon_Cart_Recovery_Admin {
             case 'admin-setting':
                 include FLEXI_ABANDON_CART_RECOVERY_DIR . '/modules/flexi-cart-admin-settings.php';
                 break;
+            case 'webhooks':
+                include FLEXI_ABANDON_CART_RECOVERY_DIR . '/modules/flexi-cart-webhooks-settings.php';
+                break;
+            case 'integrations':
+                include FLEXI_ABANDON_CART_RECOVERY_DIR . '/modules/flexi-cart-integrations-settings.php';
+                break;
             case 'settings-view':
             default:
                 include FLEXI_ABANDON_CART_RECOVERY_DIR . '/modules/flexi-cart-global-settings.php';
@@ -762,6 +768,11 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         $from_email = isset( $abandoned_cart_setting['email_from'] ) ? $abandoned_cart_setting['email_from'] : '';
         $useremail  = $user_info['user_email'];
 
+        // Skip sending if the user has unsubscribed.
+        if ( class_exists( 'Flexi_Webhooks' ) && Flexi_Webhooks::is_unsubscribed( $useremail ) ) {
+            return false;
+        }
+
         if ( 0 === $mail_sent_at || empty( $mail_sent_at ) ) {
             $enable_email_temps = $this->get_template_type_and_data( 'first', $user_id, $user_info, $cart_details );
 
@@ -806,7 +817,12 @@ class Flexi_Abandon_Cart_Recovery_Admin {
 
                 if ( $mail_sent ) {
                     $this->flexi_email_logs_activity( $user_id, $subject, $from_email, $useremail, 'success', $simple_mail_body, $enable_email_temps['temp_name'] );
-
+                    do_action( 'flexi_acr_email_sent', array(
+                        'user_id'  => $user_id,
+                        'email_to' => $useremail,
+                        'subject'  => $subject,
+                        'template' => $enable_email_temps['temp_name'],
+                    ) );
                 } else {
                     $error_message = error_get_last()['message'];
                     $this->flexi_email_logs_activity( $user_id, $subject, $from_email, $useremail, 'error', $error_message, $enable_email_temps['temp_name'] );
@@ -876,7 +892,23 @@ class Flexi_Abandon_Cart_Recovery_Admin {
             $tracking_link_url = add_query_arg( array( 'coupon_code' => $coupon_name ), $tracking_link_url );
         }
 
-        $cart_rec_subject       = $email_data['email_subject'];
+        // A/B testing: pick subject A or B randomly if configured.
+        // Note: variant assignment is randomised per send, not persisted per user.
+        // For statistically rigorous A/B tests, persist the variant assignment
+        // in the user meta or cart extra_data and re-use on subsequent sends.
+        $extra_data       = isset( $email_data['extra_data'] ) ? json_decode( $email_data['extra_data'], true ) : array();
+        if ( ! is_array( $extra_data ) ) {
+            $extra_data = array();
+        }
+        $ab_variant       = 'A';
+        $cart_rec_subject = $email_data['email_subject'];
+        if ( ! empty( $extra_data['ab_test_enabled'] ) && ! empty( $extra_data['ab_subject_b'] ) ) {
+            if ( wp_rand( 0, 1 ) === 1 ) {
+                $cart_rec_subject = $extra_data['ab_subject_b'];
+                $ab_variant       = 'B';
+            }
+        }
+
         $filtered_email_subject = $this->flexi_replace_email_shortcodes( $cart_rec_subject, $user_info, $tracking_link_url, $cart_details, $coupon_type, $coupon_name );
 
         $cart_rec_body       = $email_data['email_body'];
@@ -892,6 +924,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
             'subject'          => $filtered_email_subject,
             'message'          => $email_message_to_send,
             'simple_mail_body' => $simple_mail_body,
+            'ab_variant'       => $ab_variant,
         );
         return $email_parts;
 
@@ -1064,6 +1097,15 @@ class Flexi_Abandon_Cart_Recovery_Admin {
             return ( '<b>' . esc_html( $coupon_name ) . '</b>' );
         }
 
+        if ( 'unsubscribe_url' === $field_name ) {
+            $email = isset( $user_meta['user_email'] ) ? $user_meta['user_email'] : '';
+            if ( $email && class_exists( 'Flexi_Webhooks' ) ) {
+                $url = Flexi_Webhooks::get_unsubscribe_url( $email );
+                return '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Unsubscribe', 'flexi-abandon-cart-recovery' ) . '</a>';
+            }
+            return '';
+        }
+
         $is_executable = $this->flexi_coupon_is_executeable( $coupon_type, $coupon_name, $user_meta, $cart_details );
 
         if ( $is_executable ) {
@@ -1188,6 +1230,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         $parms                    = array( 'opened' => 'opened + 1' );
         $where                    = 'user_id = ' . $user_id . '';
         $abandoned_carts_queries->update_db_query( 'flexi_email_logs', $parms, $where );
+        do_action( 'flexi_acr_email_opened', array( 'user_id' => $user_id ) );
     }
 
     public function track_link_click() {
@@ -1289,6 +1332,7 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         $parms                    = array( 'clicked' => 'clicked + 1' );
         $where                    = 'user_id = ' . $user_id . '';
         $abandoned_carts_queries->update_db_query( 'flexi_email_logs', $parms, $where );
+        do_action( 'flexi_acr_email_clicked', array( 'user_id' => $user_id ) );
     }
 
     public function track_purchase( $order_id ) {
@@ -1303,6 +1347,12 @@ class Flexi_Abandon_Cart_Recovery_Admin {
         }
         if ( $user_id ) {
             $this->mark_purchase_completed( $user_id );
+            do_action( 'flexi_acr_cart_recovered', array(
+                'user_id'     => $user_id,
+                'order_id'    => $order_id,
+                'order_total' => $order->get_total(),
+                'email'       => $order->get_billing_email(),
+            ) );
         }
     }
 

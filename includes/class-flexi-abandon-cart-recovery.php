@@ -122,6 +122,23 @@ class Flexi_Abandon_Cart_Recovery {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-flexi-abandon-cart-recovery-public.php';
 
+		/**
+		 * REST API endpoints for external integrations.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-flexi-rest-api.php';
+
+		/**
+		 * Webhook dispatcher for real-time event notifications.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-flexi-webhooks.php';
+
+		/**
+		 * Third-party integration base and individual integrations.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-base.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-mailchimp.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/integrations/class-flexi-acr-integration-google-analytics.php';
+
 		$this->loader = new Flexi_Abandon_Cart_Recovery_Loader();
 
 	}
@@ -203,6 +220,21 @@ class Flexi_Abandon_Cart_Recovery {
 
 			$this->loader->add_filter( 'mce_buttons', $plugin_admin, 'flexi_tinymce_admin_btn' );
 			$this->loader->add_filter( 'mce_external_plugins', $plugin_admin, 'flexi_admin_filter_mce_plugin' );
+		}
+
+		// Initialize REST API.
+		new Flexi_Rest_Api();
+
+		// Initialize Webhooks.
+		new Flexi_Webhooks();
+
+		// Initialize active integrations.
+		$integrations = array(
+			new Flexi_ACR_Integration_Mailchimp(),
+			new Flexi_ACR_Integration_Google_Analytics(),
+		);
+		foreach ( $integrations as $integration ) {
+			$integration->init();
 		}
 
 	}

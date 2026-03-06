@@ -17,6 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : 'settings-view';
 
+$valid_sections = array( 'settings-view', 'carts-list', 'email-settings', 'logs-view', 'language-setting', 'logs-view-scheduler', 'admin-setting', 'webhooks', 'integrations' );
+if ( ! in_array( $section, $valid_sections, true ) ) {
+	$section = 'settings-view';
+}
 ?>
 
 <div class="success-admin-notices is-dismissible"></div>
@@ -51,6 +55,18 @@ $section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['s
 				<a class="nav-tab <?php echo 'admin-setting' === $section ? 'nav-tab-active' : ''; ?>"
 					href="<?php echo esc_url( admin_url( 'admin.php?page=flexi-cart-recovery-settings&section=admin-setting' ) ); ?>">
 					<?php esc_html_e( 'Admin Settings', 'flexi-abandon-cart-recovery' ); ?>
+				</a>
+			</li>
+			<li>
+				<a class="nav-tab <?php echo 'webhooks' === $section ? 'nav-tab-active' : ''; ?>"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=flexi-cart-recovery-settings&section=webhooks' ) ); ?>">
+					<?php esc_html_e( 'Webhooks', 'flexi-abandon-cart-recovery' ); ?>
+				</a>
+			</li>
+			<li>
+				<a class="nav-tab <?php echo 'integrations' === $section ? 'nav-tab-active' : ''; ?>"
+					href="<?php echo esc_url( admin_url( 'admin.php?page=flexi-cart-recovery-settings&section=integrations' ) ); ?>">
+					<?php esc_html_e( 'Integrations', 'flexi-abandon-cart-recovery' ); ?>
 				</a>
 			</li>
 		</ul>

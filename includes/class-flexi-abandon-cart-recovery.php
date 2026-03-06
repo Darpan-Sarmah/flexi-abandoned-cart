@@ -221,8 +221,10 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
-		$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
-		$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		if ( 'on' === get_option( 'flexi_force_guest_login', 'off' ) ) {
+			$this->loader->add_filter( 'woocommerce_is_purchasable', $plugin_public, 'flexi_cart_woocommerce_is_purchasable', 10, 2 );
+			$this->loader->add_filter( 'woocommerce_get_price_html', $plugin_public, 'flexi_cart_woocommerce_get_price_html', 10, 2 );
+		}
 	}
 
 	/**

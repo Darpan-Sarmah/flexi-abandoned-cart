@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create distribution ZIP
+        run: |
+          PLUGIN_SLUG="flexi-abandon-cart-recovery"
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          BUILD_DIR="/tmp/${PLUGIN_SLUG}-build"
+          mkdir -p "${BUILD_DIR}/${PLUGIN_SLUG}"
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='webpack.config.js' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='Makefile' \
+            --exclude='*.map' \
+            --exclude='marketing' \
+            --exclude='tests' \
+            --exclude='tables.txt' \
+            . "${BUILD_DIR}/${PLUGIN_SLUG}/"
+          mkdir -p dist
+          cd "${BUILD_DIR}" && zip -r "${GITHUB_WORKSPACE}/dist/${PLUGIN_SLUG}-${VERSION}.zip" "${PLUGIN_SLUG}/"
+          echo "ZIP_PATH=dist/${PLUGIN_SLUG}-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Flexi Abandoned Cart Recovery ${{ steps.version.outputs.VERSION }}"
+          body_path: CHANGELOG.md
+          files: ${{ env.ZIP_PATH }}
+          draft: false
+          prerelease: false

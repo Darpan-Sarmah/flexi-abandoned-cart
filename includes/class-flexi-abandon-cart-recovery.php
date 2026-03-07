@@ -211,12 +211,8 @@ class Flexi_Abandon_Cart_Recovery {
 		$this->loader->add_filter( 'flexi_check_coupon_expiry', $plugin_admin, 'mark_flexi_coupons_expiry');
 		
 
-		// testing ajax
-		$this->loader->add_action('wp_ajax_flexi_get_global_setting',$plugin_admin, 'mark_flexi_coupons_expiry');
-		$this->loader->add_action('wp_ajax_nopriv_flexi_get_global_setting',$plugin_admin, 'mark_flexi_coupons_expiry');
-		
-		$page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-		if ( isset( $page ) && 'flexi-cart-recovery-settings' === $page ) {
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( '' !== $page && 'flexi-cart-recovery-settings' === $page ) {
 
 			$this->loader->add_filter( 'mce_buttons', $plugin_admin, 'flexi_tinymce_admin_btn' );
 			$this->loader->add_filter( 'mce_external_plugins', $plugin_admin, 'flexi_admin_filter_mce_plugin' );

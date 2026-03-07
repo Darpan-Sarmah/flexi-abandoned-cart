@@ -26,33 +26,34 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
         return;
     }
     // Sanitize and save the settings.
-    $aban_cart_rec_setting_array = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    if (isset($aban_cart_rec_setting_array[ 'enable_tracking' ])) {
-        $aban_cart_rec_setting_array[ 'enable_tracking' ] = 'on';
-    } else {
-        $aban_cart_rec_setting_array[ 'enable_tracking' ] = 'off';
-    }
-
-    if (isset($aban_cart_rec_setting_array[ 'force_guest_login' ])) {
-        $aban_cart_rec_setting_array[ 'force_guest_login' ] = 'on';
-    } else {
-        $aban_cart_rec_setting_array[ 'force_guest_login' ] = 'off';
-    }
+    $aban_cart_rec_setting_array = array(
+        'enable_tracking'             => isset( $_POST['enable_tracking'] ) && 'on' === sanitize_text_field( wp_unslash( $_POST['enable_tracking'] ) ) ? 'on' : 'off',
+        'force_guest_login'           => isset( $_POST['force_guest_login'] ) && 'on' === sanitize_text_field( wp_unslash( $_POST['force_guest_login'] ) ) ? 'on' : 'off',
+        'capture_valid_email'         => isset( $_POST['capture_valid_email'] ) ? sanitize_text_field( wp_unslash( $_POST['capture_valid_email'] ) ) : '',
+        'cart_abandon_time'           => isset( $_POST['cart_abandon_time'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_abandon_time'] ) ) : '',
+        'cart_abandon_time_duration'  => isset( $_POST['cart_abandon_time_duration'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_abandon_time_duration'] ) ) : '',
+        'resend_email_after'          => isset( $_POST['resend_email_after'] ) ? sanitize_text_field( wp_unslash( $_POST['resend_email_after'] ) ) : '',
+        'resend_email_after_duration' => isset( $_POST['resend_email_after_duration'] ) ? sanitize_text_field( wp_unslash( $_POST['resend_email_after_duration'] ) ) : '',
+        'cart_expire_after'           => isset( $_POST['cart_expire_after'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_expire_after'] ) ) : '',
+        'cart_expire_after_duration'  => isset( $_POST['cart_expire_after_duration'] ) ? sanitize_text_field( wp_unslash( $_POST['cart_expire_after_duration'] ) ) : '',
+        'email_from'                  => isset( $_POST['email_from'] ) ? sanitize_email( wp_unslash( $_POST['email_from'] ) ) : '',
+        'email_name'                  => isset( $_POST['email_name'] ) ? sanitize_text_field( wp_unslash( $_POST['email_name'] ) ) : '',
+        'email_and_plugin_language'   => isset( $_POST['email_and_plugin_language'] ) ? sanitize_text_field( wp_unslash( $_POST['email_and_plugin_language'] ) ) : '',
+        'gdpr_message'                => isset( $_POST['gdpr_message'] ) ? wp_kses_post( wp_unslash( $_POST['gdpr_message'] ) ) : '',
+        'gdpr_shop_page'              => isset( $_POST['gdpr_shop_page'] ) ? sanitize_text_field( wp_unslash( $_POST['gdpr_shop_page'] ) ) : '',
+        'gdpr_product_page'           => isset( $_POST['gdpr_product_page'] ) ? sanitize_text_field( wp_unslash( $_POST['gdpr_product_page'] ) ) : '',
+    );
 
     // Language Switch.
-    if (isset($aban_cart_rec_setting_array[ 'email_and_plugin_language' ])) {
+    if ('' !== $aban_cart_rec_setting_array['email_and_plugin_language']) {
 
-        $email_and_plugin_language = sanitize_text_field($aban_cart_rec_setting_array[ 'email_and_plugin_language' ]);
+        $email_and_plugin_language = $aban_cart_rec_setting_array['email_and_plugin_language'];
         switch_to_locale($email_and_plugin_language);
         update_option('aban_cart_rec_language', $email_and_plugin_language);
 
         'en_US' === $email_and_plugin_language ? $email_and_plugin_language = '' : $email_and_plugin_language;
         update_option('WPLANG', $email_and_plugin_language);
     }
-
-    // Save the force guest login setting as a standalone option for easy retrieval.
-    $force_guest_login = isset($aban_cart_rec_setting_array['flexi_force_guest_login']) ? 'on' : 'off';
-    update_option('flexi_force_guest_login', $force_guest_login);
 
     // Update Setting Option.
     $array_to_save = wp_json_encode($aban_cart_rec_setting_array, true);
@@ -260,32 +261,6 @@ $email_from = isset($saved_settings[ 'email_from' ]) ? esc_attr($saved_settings[
                                 <?php echo esc_html__('Italian', 'flexi-abandon-cart-recovery'); ?>
                             </option>
                         </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-        <hr>
-
-        <h2><?php echo esc_html__('Guest User Behavior', 'flexi-abandon-cart-recovery'); ?></h2>
-
-        <table class="form-table configuration_settings">
-            <tbody>
-                <!-- Force Guest Login -->
-                <tr>
-                    <th scope="row" class="titledesc">
-                        <?php echo esc_html__('Force Guest Users to Login?', 'flexi-abandon-cart-recovery'); ?>
-                    </th>
-                    <td class="forminp forminp-checkbox">
-                        <label for="flexi_force_guest_login">
-                            <?php
-$flexi_force_guest_login = get_option('flexi_force_guest_login', 'off');
-$checked                 = 'on' === $flexi_force_guest_login ? 'checked' : '';
-?>
-                            <input name="flexi_force_guest_login" id="flexi_force_guest_login" type="checkbox" value="on"
-                                <?php echo esc_html($checked); ?>>
-                            <?php echo esc_html__('Enable this to require guest users to login before viewing prices or making purchases. Disable to allow guest browsing and track guest cart abandonment.', 'flexi-abandon-cart-recovery'); ?>
-                        </label>
                     </td>
                 </tr>
             </tbody>

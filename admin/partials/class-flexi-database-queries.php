@@ -117,13 +117,10 @@ class Flexi_Database_Queries
         global $wpdb;
 
         $set_clause = array();
+        $set_values = array();
         foreach ($parameters as $column => $value) {
-
-            if (preg_match("/$column/", $value)) {
-                $set_clause[  ] = "{$column} = {$value}";
-            } else {
-                $set_clause[  ] = "{$column} = " . $wpdb->prepare('%s', $value);
-            }
+            $set_clause[] = "{$column} = %s";
+            $set_values[] = $value;
         }
         $set_clause = implode(', ', $set_clause);
 
@@ -139,10 +136,8 @@ class Flexi_Database_Queries
         }
 
         $query .= ';';
-        $result = $wpdb->query($query);
+        $result = $wpdb->query( $wpdb->prepare( $query, ...$set_values ) );
 
-        // print_r($result);
-        // die;
         return $result;
     }
 

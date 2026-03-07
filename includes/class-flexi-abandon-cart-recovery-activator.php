@@ -55,7 +55,7 @@ class Flexi_Abandon_Cart_Recovery_Activator {
 
             $wpdb->prefix . 'flexi_abandon_cart_users' => "
 				CREATE TABLE IF NOT EXISTS {$wpdb->prefix}flexi_abandon_cart_users (
-					id BIGINT(20) UNSIGNED DEFAULT NULL,
+					id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 					user_information LONGTEXT NOT NULL,
 					PRIMARY KEY (id)
 				) $charset_collate;",
@@ -209,8 +209,7 @@ class Flexi_Abandon_Cart_Recovery_Activator {
         // Prepare and execute the query.
         $existing_record = $wpdb->get_var(
             $wpdb->prepare(
-                'SELECT id FROM %s WHERE id = %d',
-                $table_name,
+                "SELECT id FROM {$wpdb->prefix}flexi_email_templates WHERE id = %d",
                 $default_template_id
             )
         );
@@ -249,8 +248,7 @@ class Flexi_Abandon_Cart_Recovery_Activator {
         // Prepare and execute the query.
         $existing_record2 = $wpdb->get_var(
             $wpdb->prepare(
-                'SELECT id FROM %s WHERE id = %d',
-                $table_name,
+                "SELECT id FROM {$wpdb->prefix}flexi_email_templates WHERE id = %d",
                 $default_coupon_tem_id
             )
         );

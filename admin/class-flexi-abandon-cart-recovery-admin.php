@@ -75,8 +75,8 @@ class Flexi_Abandon_Cart_Recovery_Admin {
 
         wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/flexi-abandon-cart-recovery-admin.css', array(), $this->version, 'all' );
 
-        $page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-        if ( isset( $page ) && ( ( 'flexi-cart-recovery-settings' === $page ) || 'flexi-abandon-cart-recovery-coupons' === $page ) ) {
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+        if ( '' !== $page && ( ( 'flexi-cart-recovery-settings' === $page ) || 'flexi-abandon-cart-recovery-coupons' === $page ) ) {
             // Enqueue Select2 CSS
             wp_register_style( 'select2-css', plugin_dir_url( __FILE__ ) . 'css/select2.min.css', array(), $this->version, 'all' );
             wp_enqueue_style( 'select2-css' );
@@ -113,8 +113,8 @@ class Flexi_Abandon_Cart_Recovery_Admin {
          * Including custo tinymce js.
          */
 
-        $page = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_STRING );
-        if ( isset( $page ) && 'flexi-cart-recovery-settings' === $page ) {
+        $page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+        if ( '' !== $page && 'flexi-cart-recovery-settings' === $page ) {
             wp_enqueue_script(
                 'flexi_custom_tinymce_shortcode',
                 plugin_dir_url( __FILE__ ) . 'js/flexi_custom_tinymce_shortcode.js',

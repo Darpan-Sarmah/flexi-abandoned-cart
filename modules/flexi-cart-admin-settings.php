@@ -21,11 +21,13 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
         return;
     }
     // Sanitize and save the settings.
-    $admin_notifi_settings_array = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $admin_notifi_settings_array = array(
+        'purchase_mail'  => isset( $_POST['purchase_mail'] ) && 'on' === sanitize_text_field( wp_unslash( $_POST['purchase_mail'] ) ) ? 'on' : 'off',
+        'receive_report' => isset( $_POST['receive_report'] ) && 'on' === sanitize_text_field( wp_unslash( $_POST['receive_report'] ) ) ? 'on' : 'off',
+    );
 
-    $purchase_mail = isset($admin_notifi_settings_array[ 'purchase_mail' ]) ? $admin_notifi_settings_array[ 'purchase_mail' ] = 'on' : $admin_notifi_settings_array[ 'purchase_mail' ] = 'off';
-
-    $receive_report = isset($admin_notifi_settings_array[ 'receive_report' ]) ? $admin_notifi_settings_array[ 'receive_report' ] = 'on' : $admin_notifi_settings_array[ 'receive_report' ] = 'off';
+    $purchase_mail  = $admin_notifi_settings_array['purchase_mail'];
+    $receive_report = $admin_notifi_settings_array['receive_report'];
 
     // Update Setting Option.
     $array_to_save = wp_json_encode($admin_notifi_settings_array, true);

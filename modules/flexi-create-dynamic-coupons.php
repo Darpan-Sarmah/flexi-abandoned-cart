@@ -36,7 +36,16 @@ if (isset($_SERVER[ 'REQUEST_METHOD' ]) && 'POST' === $_SERVER[ 'REQUEST_METHOD'
         return;
     }
 
-    $flexi_coupon_data = filter_input_array(INPUT_POST, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    // phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified above
+    $raw_post          = wp_unslash( $_POST );
+    $flexi_coupon_data = array_map( 'sanitize_text_field', array_filter( $raw_post, 'is_string' ) );
+    // Preserve array fields without sanitize_text_field stripping them.
+    foreach ( $raw_post as $key => $value ) {
+        if ( is_array( $value ) ) {
+            $flexi_coupon_data[ $key ] = array_map( 'sanitize_text_field', $value );
+        }
+    }
+    // phpcs:enable WordPress.Security.NonceVerification.Missing
     $coupon_filters    = [  ];
 
     foreach ($flexi_coupon_data as $key => $value) {

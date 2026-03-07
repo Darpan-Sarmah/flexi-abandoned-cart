@@ -363,13 +363,13 @@ wp_nonce_field('abandon_cart_templates', 'abandon_cart_templates_actions');
                     continue;
                 }
 
-                $template_data = $abandoned_carts_queries->select_db_query('flexi_email_templates', '*', 'id = ' . esc_sql($template_id));
+                $template_data = $abandoned_carts_queries->select_db_query('flexi_email_templates', '*', array( 'id' => $template_id ) );
                 if (!empty($template_data) && isset($template_data[ 0 ][ 'status' ]) && 'on' === $template_data[ 0 ][ 'status' ]) {
                     $notice = __('Active templates cannot be deleted.', 'flexi-abandon-cart-recovery');
                     continue;
                 }
 
-                $abandoned_carts_queries->delete_db_query('flexi_email_templates', array('id ' => esc_sql($template_id)));
+                $abandoned_carts_queries->delete_db_query('flexi_email_templates', array('id' => $template_id));
             }
 
             $redirect_url = add_query_arg(
